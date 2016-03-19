@@ -60,7 +60,6 @@ class Ball {
   lights();
   fill(#FF0505);
   translate(location.x, location.y, - location.z);
-  print(location.x);
   sphere(sphereRadius);
   popMatrix();
   }
