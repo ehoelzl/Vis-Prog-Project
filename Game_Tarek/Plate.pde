@@ -1,24 +1,23 @@
   float rotateX;
   float rotateZ;
+  ArrayList<PVector> cylinders;
 class Plate {
-  private ArrayList<PVector> cylinders;
   private float dims;
-  private Cylinder  cylinder2D = new Cylinder();
-  private Cylinder cylinder3D = new Cylinder();
+  private Cylinder cylinder = new Cylinder();
   
-  Plate(float dim) {
+  Plate(float dim) { //Creates a Square plate of dimensions dims
     dims = dim;
     rotateX = .0;
     rotateZ = .0;
     cylinders = new ArrayList();
-    cylinder2D.get2D();
-    cylinder3D.get3D();
     
   }
   
-  public void display_game() { //displays the plate for playing the game
-    rotateX(rotateX);
-    rotateZ(rotateZ);
+  public void display() { //displays the plate for both modes
+    if(!shiftMode) {
+      rotateX(rotateX);
+      rotateZ(rotateZ);
+    }
     pushMatrix();
     stroke(3);
     lights();
@@ -26,33 +25,13 @@ class Plate {
     box(dims,dims * 0.04, dims);
     if (!cylinders.isEmpty()){
       for(PVector p : cylinders){
-        cylinder3D.display(p.x,0,p.y);
+        cylinder.display(p.x,0,p.y);
       }
     }
     popMatrix();
   }
-   public void display_shift() { // displays the plate for the shift mode.
-    pushMatrix();
-    stroke(3);
-    lights();
-    fill(#2CDE1D);
-    rect(-dims/2,-dims/2,dims,dims);
-    if (!cylinders.isEmpty()){
-      for(PVector p : cylinders){
-        cylinder2D.display(p.x,p.y,0);
-      }
-    }
-    popMatrix();
- }
- 
    
- private double distance(float x1, float y1, float x2, float y2){ 
-   float distX = Math.abs(x1 - x2);
-   float distY = Math.abs(y1 - y2);
-   return Math.sqrt(distX*distX + distY*distY);
- }
- 
- public boolean verify_boundaries(float x, float y){ //verifies the location of the click 
+ public boolean verify_boundaries(float x, float y){ //verifies the location of the click for Cylinder inserstion
    boolean ok = distance(ball.location.x, ball.location.y, x, y) > (2*ball.radius + cylinderBaseSize);
    for(PVector p: cylinders){
        ok = distance(p.x, p.y, x, y) > 2*cylinderBaseSize;

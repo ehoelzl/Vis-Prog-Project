@@ -1,6 +1,6 @@
 
 float cylinderBaseSize = 15;
-float cylinderHeight = 25;
+float cylinderHeight = 30;
 int cylinderResolution = 40;
 color couleur = #1932FC;
 
@@ -10,7 +10,7 @@ class Cylinder {
     float[] y = new float[cylinderResolution + 1];
     private PShape openCylinder, bottomSurface, topSurface;
     
-    Cylinder(){
+    Cylinder(){ //Creates a cylinder to be displayed
       openCylinder = new PShape();
       bottomSurface = new PShape();
       topSurface = new PShape();
@@ -23,34 +23,11 @@ class Cylinder {
         openCylinder = createShape();
         bottomSurface = createShape();
         topSurface = createShape();
+        sketchCylinder();
     }
     
-    public void get2D(){ // set current cylinderShape to a 2D representation
-      openCylinder.beginShape(QUAD_STRIP);
-      topSurface.beginShape(TRIANGLE_FAN);
-      bottomSurface.beginShape(TRIANGLE_FAN);
-      openCylinder.noStroke();
-      openCylinder.fill(couleur);
-      topSurface.noStroke();
-      bottomSurface.noStroke();
-      topSurface.fill(couleur);
-      bottomSurface.fill(couleur);
-      topSurface.vertex(0,0,0);
-      topSurface.vertex(0,0,0);
-      bottomSurface.vertex(0,0, cylinderHeight);
-  
-      for(int i = 0; i < x.length; i++) {
-        openCylinder.vertex(x[i], y[i] , 0);
-        openCylinder.vertex(x[i], y[i], cylinderHeight);
-        topSurface.vertex(x[i], y[i], 0);
-        bottomSurface.vertex(x[i], y[i], cylinderHeight);
-      }
-      openCylinder.endShape();
-      topSurface.endShape();
-      bottomSurface.endShape();
-    }
     
-    public void get3D(){ // set current cylinderShape to a 2D representation
+    private void sketchCylinder(){ // Sketches the Cylinder to use
       openCylinder.beginShape(QUAD_STRIP);
       topSurface.beginShape(TRIANGLE_FAN);
       bottomSurface.beginShape(TRIANGLE_FAN);
