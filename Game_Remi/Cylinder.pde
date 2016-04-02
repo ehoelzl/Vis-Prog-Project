@@ -1,3 +1,8 @@
+/**
+* This class represents a cylinder
+**/
+
+
 static final float cylinderBaseRadius = 15;
 static final float cylinderHeight = 25;
 static final int cylinderResolution = 40;
@@ -26,8 +31,10 @@ class Cylinder {
     setCylinder();
     
 }
-    
-  public void setCylinder() { // set current cylinderShape to a 3D representation
+  /**
+  * This function creates the cylinder (shape)
+  **/
+  public void setCylinder() { 
     openCylinder.beginShape(QUAD_STRIP);
     topSurface.beginShape(TRIANGLE_FAN);
     bottomSurface.beginShape(TRIANGLE_FAN);
@@ -54,7 +61,10 @@ class Cylinder {
     bottomSurface.endShape();
   }
     
-  public void display(float x, float y ,float z) { // display the cylinder at the correct location
+  /**
+  * Function use to display a cylinder given its position
+  **/
+  public void display(float x, float y , float z) { 
     pushMatrix();
     
     translate(x,y,z);

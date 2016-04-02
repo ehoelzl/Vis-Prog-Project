@@ -1,11 +1,11 @@
 final static float scaleFactor = .04;
 final static float MAX_SPEED = 300;
 final static float gravityConstant = 9.81;
-final static float normalForce = 1.0 * 1000;
-final static float mu = .01;
-final static float frictionMagnitude = normalForce * mu;
+final static float mu = .3;
 final static float plateWidth = 750 / 2f;
 final static float sphereRadius = 20;
+final static float sphereMass = .5;
+
 
 Ball ball;
 Plate plate;
@@ -14,13 +14,14 @@ boolean shiftMode = false;
 float rotateX = .0;
 float rotateZ = .0;
 float speedFactor = 64;
-float deltaT = 1 / frameRate;
+float deltaT = 1 / 60f;
 
 void settings() {
   size(750, 750, P3D);
 }
 
 void setup() {
+  //frameRate(60);
   noStroke();
   plate = new Plate();
   ball = new Ball();
@@ -29,13 +30,14 @@ void setup() {
 
 
 void draw() {  
+  deltaT = 1 / 60f;
   background(#403535);
   translate(width / 2f, height / 2f, 0);
   
   if(!shiftMode) {
-    drawGame();
+    drawGame(); // Normal Game
   } else {
-    drawShiftMode();
+    drawShiftMode(); // Paused game, to put Cylinders
   }
 }
 
@@ -46,9 +48,12 @@ void drawGame() {
     rotateX(rotateX);
     rotateZ(rotateZ);
   
-    gravityForce.x = sin(rotateZ) * gravityConstant * 1000;
-    gravityForce.z = - sin(rotateX) * gravityConstant * 1000;
-
+    gravityForce.x = sin(rotateZ) * cos(rotateX) * gravityConstant;
+    gravityForce.z = - sin(rotateX) * gravityConstant;
+    gravityForce.y = cos(rotateX) * cos(rotateZ) * gravityConstant;
+    
+    gravityForce.mult(sphereMass * 1000);
+        
     plate.display();
   
     ball.update();
@@ -116,4 +121,8 @@ void keyReleased() {
       shiftMode = false;
     } 
   }
+}
+
+private float squared(float a) {
+  return a * a;
 }

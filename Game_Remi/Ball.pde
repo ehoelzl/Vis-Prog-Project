@@ -1,8 +1,10 @@
-final static float sphereY = - sphereRadius - (plateWidth / 2f * scaleFactor);
-final static float sphereMass = 10;
-final static float bordersLength = 10;
+/**
+* This class represents our ball
+*
+**/
 
-PVector initialVelocity = new PVector();
+final static float sphereY = - sphereRadius - (plateWidth / 2f * scaleFactor);
+final static float bordersLength = 10;
 
 class Ball {
   private PVector velocity;
@@ -11,6 +13,8 @@ class Ball {
   private PVector location;
   private PVector potentialLocation;
   private float mass;
+  private float normalForce;
+  private float frictionMagnitude;
   
   public Ball() {
     velocity = new PVector();
@@ -19,8 +23,13 @@ class Ball {
     location = new PVector(0, sphereY, 0);
     potentialLocation = location.copy();
     mass = sphereMass;
+    normalForce = 0;
+    frictionMagnitude = 0;
   }
   
+  /**
+  * This functions permits to update the ball's location before calling display
+  **/
   public void update() {    
         
     computeVelocity();
@@ -32,6 +41,7 @@ class Ball {
     if(n != null) {
       velocity = velocity.sub(n.mult(2 * (velocity.dot(n))));
       computeLocation(location);
+      print("test");
     } else {
       if(outOfBounds(potentialLocation)) {
         computeLocation(location);
@@ -46,27 +56,36 @@ class Ball {
     location.z = Math.max(location.z, - plateWidth / 2f);
     
     potentialLocation = location.copy();
+    
        
     oldVelocity = velocity.copy();
-    
-    print(velocity.mag()+" ");
-    
+        
   }
   
+  /**
+  * This function computes the location the given vector will have given the current velocity
+  **/
   private void computeLocation(PVector loc) {
     loc.add(velocity.x * deltaT, 0, velocity.z * deltaT);   
   }
   
+  /**
+  * This function computes the velocity based on the gravity and friction forces
+  **/
   private void computeVelocity() {
     computeFriction();
-    velocity = gravityForce.copy();
-    velocity.add(friction);
-    velocity.mult(deltaT / mass);
-    velocity.add(oldVelocity);
-    
+    velocity = new PVector(gravityForce.x, 0, gravityForce.z);
+    velocity.add(friction.div(mass));
+    velocity.mult(deltaT);
+    velocity.add(oldVelocity);   
     }
   
+  /**
+  * Helper function that computes the friction for this frame
+  **/
   private void computeFriction() {
+    normalForce = gravityForce.y;
+    frictionMagnitude = normalForce * mu;
     friction = oldVelocity.copy();
     friction.mult(-1);
     friction.normalize();
@@ -74,21 +93,26 @@ class Ball {
     
   }
   
+  /**
+  * This function permits to check if the given location is out of the plate and returns true if it is and false otherwise
+  **/
   private boolean outOfBounds(PVector loc) {
     boolean hitEdge = false;
     
     if(loc.x >= plateWidth / 2f - sphereRadius || loc.x <= - (plateWidth / 2f - sphereRadius)) {
-      velocity.x = velocity.x * -1;
+      velocity.x = oldVelocity.x * -1;
       hitEdge = true;
     }
     if(loc.z >= plateWidth / 2f - sphereRadius || loc.z <= - (plateWidth / 2f - sphereRadius)) {
-      velocity.z = velocity.z * -1;
+      velocity.z = oldVelocity.z * -1;
       hitEdge = true;
     }
-    //print(hitEdge);
     return hitEdge;
   }
   
+  /**
+  * The display function, used to display the ball on the screen
+  **/
   private void display() {
     pushMatrix();
     lights();
