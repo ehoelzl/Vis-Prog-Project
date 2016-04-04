@@ -32,9 +32,9 @@ class Plate {
   }
    
  public boolean verify_boundaries(float x, float y){ //verifies the location of the click for Cylinder inserstion
-   boolean ok = distance(ball.location.x, ball.location.y, x, y) > (2*ball.radius + cylinderBaseSize);
+   boolean ok = distance(ball.location.x, ball.location.z, x, y) > (ball.radius + cylinderBaseSize);
    for(PVector p: cylinders){
-       ok = distance(p.x, p.y, x, y) > 2*cylinderBaseSize;
+       ok = ok && (distance(p.x, p.y, x, y) > 2*cylinderBaseSize);
      }
    float bound = dims/2 - cylinderBaseSize;
    return ( x < bound && x >-bound && y<bound && y>-bound && ok);

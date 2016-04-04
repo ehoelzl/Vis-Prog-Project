@@ -72,7 +72,7 @@ class Ball{
 
       if (distance(location.x, location.z, v.x, v.y) <= cylinderBaseSize + radius) {
         
-        PVector n = new PVector(location.x - v.x, location.y, v.y); //Vector from cylinder center to ball center
+        PVector n = new PVector(location.x - v.x, location.z - v.y); //Vector from cylinder center to ball center
         n = n.normalize(); //normalized
         PVector V2 = velocity.sub(n.mult(2*velocity.dot(n)));
         velocity = V2.copy();
