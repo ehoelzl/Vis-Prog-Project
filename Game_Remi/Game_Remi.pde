@@ -21,7 +21,6 @@ void settings() {
 }
 
 void setup() {
-  //frameRate(60);
   noStroke();
   plate = new Plate();
   ball = new Ball();

@@ -54,13 +54,9 @@ class Plate {
   * in the ball's direction
   **/
   public PVector checkCylinderCollision(PVector ballNextLocation) {
-    PVector n = ballNextLocation.copy();
-    n.y = 0;
-    
     for(PVector c : cylinders) {
       if(distance(ballNextLocation.x, ballNextLocation.z, c.x, c.y) <= (sphereRadius + cylinderBaseRadius)) {
-        n = n.sub(c.x, 0, c.y);
-        return n.normalize();
+        return new PVector(c.x, sphereY, c.y);
       }
     }
     

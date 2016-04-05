@@ -12,6 +12,7 @@ class Ball {
   private PVector friction;
   private PVector location;
   private PVector potentialLocation;
+  private PVector oldLocation;
   private float mass;
   private float normalForce;
   private float frictionMagnitude;
@@ -21,6 +22,7 @@ class Ball {
     oldVelocity = new PVector();
     friction = new PVector();
     location = new PVector(0, sphereY, 0);
+    oldLocation = location.copy();
     potentialLocation = location.copy();
     mass = sphereMass;
     normalForce = 0;
@@ -36,12 +38,20 @@ class Ball {
     
     computeLocation(potentialLocation);
     
-    PVector n = plate.checkCylinderCollision(potentialLocation);
-    
-    if(n != null) {
-      velocity = velocity.sub(n.mult(2 * (velocity.dot(n))));
+    PVector c = plate.checkCylinderCollision(potentialLocation);
+     
+    if(c != null) {
+      PVector n = potentialLocation.sub(c.x, sphereY, c.z);
+      n.normalize();
+      velocity = velocity.sub(n.copy().mult(2 * (velocity.dot(n))));
+      n.setMag(cylinderBaseRadius + sphereRadius);
+      c.add(n);
+      location = c.copy();
       computeLocation(location);
-      print("test");
+      if(outOfBounds(location)) { 
+        location = oldLocation.copy();
+      }
+      
     } else {
       if(outOfBounds(potentialLocation)) {
         computeLocation(location);
@@ -50,12 +60,14 @@ class Ball {
       }
     }
         
-    location.x = Math.min(location.x, plateWidth / 2f);
-    location.x = Math.max(location.x, - plateWidth / 2f);
-    location.z = Math.min(location.z, plateWidth / 2f);
-    location.z = Math.max(location.z, - plateWidth / 2f);
+    //location.x = Math.min(location.x, plateWidth / 2f);
+    //location.x = Math.max(location.x, - plateWidth / 2f);
+    //location.z = Math.min(location.z, plateWidth / 2f);
+    //location.z = Math.max(location.z, - plateWidth / 2f);
     
     potentialLocation = location.copy();
+    
+    oldLocation = location.copy();
     
        
     oldVelocity = velocity.copy();
