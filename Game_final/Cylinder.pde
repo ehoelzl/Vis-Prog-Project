@@ -9,8 +9,9 @@ class Cylinder {
     float[] x = new float[cylinderResolution + 1];
     float[] y = new float[cylinderResolution + 1];
     private PShape openCylinder, bottomSurface, topSurface;
-    
-    Cylinder(){ //Creates a cylinder to be displayed
+   
+    /*Creates a cylinder shape*/
+    Cylinder(){ 
       openCylinder = new PShape();
       bottomSurface = new PShape();
       topSurface = new PShape();
@@ -26,8 +27,8 @@ class Cylinder {
         sketchCylinder();
     }
     
-    
-    private void sketchCylinder(){ // Sketches the Cylinder to use
+    /* Sketches the Cylinder to use */
+    private void sketchCylinder(){ 
       openCylinder.beginShape(QUAD_STRIP);
       topSurface.beginShape(TRIANGLE_FAN);
       bottomSurface.beginShape(TRIANGLE_FAN);
@@ -51,6 +52,7 @@ class Cylinder {
       bottomSurface.endShape();
     }
     
+    /* Displays the cylinder on the given position */
     public void display(float x, float y ,float z){ // display the cylinder at the correct location //<>//
       pushMatrix();
       translate(x,y,z);

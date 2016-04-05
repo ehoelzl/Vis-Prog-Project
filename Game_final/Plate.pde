@@ -5,7 +5,8 @@ class Plate {
   private float dims;
   private Cylinder cylinder = new Cylinder();
   
-  Plate(float dim) { //Creates a Square plate of dimensions dims
+  /* Creates a Square plate of dimensions dims */
+  Plate(float dim) { 
     dims = dim;
     rotateX = .0;
     rotateZ = .0;
@@ -13,7 +14,8 @@ class Plate {
     
   }
   
-  public void display() { //displays the plate for both modes
+  /* Displays the plate for both modes */
+  public void display() { 
     if(!shiftMode) {
       rotateX(rotateX);
       rotateZ(rotateZ);
@@ -31,7 +33,8 @@ class Plate {
     popMatrix();
   }
    
- public boolean verify_boundaries(float x, float y){ //verifies the location of the click for Cylinder inserstion
+ /* Verifies the location of the click for Cylinder insertion */
+ public boolean verify_boundaries(float x, float y){ 
    boolean ok = distance(ball.location.x, ball.location.z, x, y) > (ball.radius + cylinderBaseSize);
    for(PVector p: cylinders){
        ok = ok && (distance(p.x, p.y, x, y) > 2*cylinderBaseSize);
@@ -42,12 +45,15 @@ class Plate {
    
  }
   
+  /* Treats the mouse Pressed event (adds a cylinder)*/
   public void mousePressed(){
-     if (verify_boundaries(mouseX - width/2, mouseY - height/2)){// if the click is correctly placed
+     if (verify_boundaries(mouseX - width/2, mouseY - height/2) && shiftMode){// if the click is correctly placed
        cylinders.add(new PVector(mouseX-width/2, mouseY - height/2)); // add cylinder to method
      }
   }
-  public void mouseDragged() { //takes care of changing the angles
+  
+  /* Treats the mouse dragged event */
+  public void mouseDragged() {
     if(pmouseY > mouseY) { //rotateX
       rotateX = min(rotateX + PI / speedFactor, PI / 6);
     } else {
@@ -65,6 +71,7 @@ class Plate {
     }
   }
   
+  /* Treats the mousewheel event */
   public void mouseWheel(MouseEvent event) {
     speedFactor += event.getCount();
     speedFactor = max(50, speedFactor);

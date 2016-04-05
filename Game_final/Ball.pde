@@ -1,16 +1,16 @@
 class Ball{
-  float radius;
-  PVector location;
-  PVector nextLocation;
-  PVector gravityForce; //Kg*m/s²
-  PVector velocity; //mm/s
-  PVector acceleration; // mm/s²
-  float normalForce = 0;
-  float mu = 0.1;
-  PVector friction;
-  float mass;
-  float maxSpeed = 5;
-  float elasticity = 0.4;
+  private float radius;
+  private PVector location;
+  private PVector nextLocation;
+  private PVector gravityForce; //Kg*m/s²
+  private PVector velocity; //mm/s
+  private PVector acceleration; // mm/s²
+  private float normalForce = 0;
+  private float mu = 0.25;
+  private PVector friction;
+  private float mass;
+  private float maxSpeed = 5;
+  private float elasticity = 0.4;
   
   Ball(float rad, float mass) { //Creates a ball with a given mass and radius
     this.mass = mass;
@@ -35,23 +35,20 @@ class Ball{
     popMatrix();
   }
   
-  void update(){ //Updates the ball's location according to gravity and friction
+  /*Updates the ball's location, and treats bounces*/
+  void update(){
     computeVelocity();
-    
-    location.add(velocity);
-    checkEdges();
-    checkCylinders();
-  }
-  
-  private void computeNextLocation(){
+    computeLocation(nextLocation);
+    cylinderCollision(nextLocation);
+    checkEdges(nextLocation);
     location = nextLocation.copy();
-    nextLocation = nextLocation.add(velocity);
   }
   
-  /**
-  * This function computes the Forces acting on the ball
-  **/
-    
+  private void computeLocation(PVector loc){
+    loc = loc.add(velocity);
+  }
+  
+  /*This function computes the Forces acting on the ball*/
     private void computeForces(){
       gravityForce.x = sin(rotateZ) * cos(rotateX) * GRAVITY;
       gravityForce.z = - sin(rotateX) * GRAVITY;
@@ -66,6 +63,7 @@ class Ball{
       friction.mult(mag);
     }
     
+    /*Computes the Velocity given the forces*/
      private void computeVelocity() {
       computeForces();
       acceleration = new PVector(gravityForce.x, 0, gravityForce.z);
@@ -76,8 +74,8 @@ class Ball{
  
   
   
-  
-  private void checkEdges() { //Checks the edges of the ball and changes the position and the velocity accordingly
+  /*Checks if the given location fits in the boundaries*/
+  private void checkEdges(PVector location) { 
     if(location.x + radius > PLATE_DIM/2) {
       velocity.x = (velocity.x * -1)*elasticity;
       location.x = PLATE_DIM/2 - radius;
@@ -89,23 +87,40 @@ class Ball{
     if(location.z + radius> PLATE_DIM/2) {
       velocity.z = (velocity.z * -1)*elasticity;
       location.z = PLATE_DIM/2 - radius;
-    } else if (location.z - radius < -PLATE_DIM/2) {
+    } else if (nextLocation.z - radius < -PLATE_DIM/2) {
       velocity.z = (velocity.z * -1)*elasticity;
       location.z = -PLATE_DIM/2 + radius;
     }
      
   }
   
-  private void checkCylinders(){
+  /*Treats cylinder collisions given a certain location of ball and collision*/
+  private void treatCollision(PVector ball, PVector cyl){
+    
+      PVector n = ball.sub(cyl).normalize(); //Normal vector from cylinder to ball center 
+      PVector newVelocity = velocity.sub(n.copy().mult(2*velocity.dot(n))); // New Velocity after collision 
+      n.setMag(cylinderBaseSize + radius); // n points from cylinder center to 
+      
+      /*This resets the ball to the border of cylinder*/
+      ball.x = cyl.x + n.x;
+      ball.y = cyl.y;
+      ball.z = cyl.z + n.z;
+      
+      
+      velocity = newVelocity.copy().mult(elasticity); //Set the velocity 
+      
+      /*Check if cylinder bounce throws the ball out of bounds*/
+      computeLocation(ball);
+      checkEdges(ball);
+    }
+  
+  
+  /* Iterates on each cylinder and treats each collision seperately, changing the location of the ball accordingly*/
+  private void cylinderCollision(PVector loc){
     for(PVector v : cylinders){
 
-      if (distance(location.x, location.z, v.x, v.y) <= cylinderBaseSize + radius) {
-        
-        PVector n = new PVector(location.x - v.x, location.z - v.y); //Vector from cylinder center to ball center
-        n = n.normalize(); //normalized
-        PVector V2 = velocity.sub(n.mult(2*velocity.dot(n)));
-        velocity = V2.copy();
-        velocity.y = 0;
+      if (distance(loc.x, loc.z, v.x, v.y) <= cylinderBaseSize + radius) {
+         treatCollision(loc, new PVector(v.x, loc.y, v.y));
       }
     }
   }

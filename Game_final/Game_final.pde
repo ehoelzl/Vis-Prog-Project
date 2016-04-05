@@ -1,5 +1,5 @@
-float radius = 20;
-float ballMass = 1000;
+float radius = 12;
+float ballMass = 1;
 boolean shiftMode = false;
 final float PLATE_DIM = 500;
 final float MAX_SPEED = 300;
