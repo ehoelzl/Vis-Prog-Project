@@ -1,10 +1,12 @@
 class Ball{
   float radius;
   PVector location;
-  PVector velocity;
-  PVector acceleration;
-  float normalForce = 1;
-  float mu = 0.01;
+  PVector nextLocation;
+  PVector gravityForce; //Kg*m/s²
+  PVector velocity; //mm/s
+  PVector acceleration; // mm/s²
+  float normalForce = 0;
+  float mu = 0.1;
   PVector friction;
   float mass;
   float maxSpeed = 5;
@@ -13,7 +15,10 @@ class Ball{
   Ball(float rad, float mass) { //Creates a ball with a given mass and radius
     this.mass = mass;
     radius = rad;
-    location = new PVector(0, - .04*PLATE_DIM/2 - radius, 0);
+    nextLocation = new PVector(0, - .04*PLATE_DIM/2 - radius, 0);
+    location = new PVector(0, - .04*PLATE_DIM/2 - radius,0);
+    gravityForce = new PVector();
+    
     velocity = new PVector(0,0,0);
     acceleration = new PVector(0,0,0);
     friction = new PVector(0,0,0);
@@ -31,22 +36,46 @@ class Ball{
   }
   
   void update(){ //Updates the ball's location according to gravity and friction
-    float mag = normalForce*mu;
-    friction = velocity.get();
-    friction.mult(-1);
-    friction.normalize();
-    friction.mult(mag);
+    computeVelocity();
     
-    acceleration.x = (sin(rotateZ) * GRAVITY + friction.x)/mass;
-    acceleration.z = (-(sin(rotateX) * GRAVITY) + friction.z)/mass;
-    
-    velocity = velocity.add(acceleration); //we update the velocity at every frame
-    
-    
-    location = location.add(velocity);
+    location.add(velocity);
     checkEdges();
     checkCylinders();
   }
+  
+  private void computeNextLocation(){
+    location = nextLocation.copy();
+    nextLocation = nextLocation.add(velocity);
+  }
+  
+  /**
+  * This function computes the Forces acting on the ball
+  **/
+    
+    private void computeForces(){
+      gravityForce.x = sin(rotateZ) * cos(rotateX) * GRAVITY;
+      gravityForce.z = - sin(rotateX) * GRAVITY;
+      gravityForce.y = cos(rotateX) * cos(rotateZ) * GRAVITY;
+      gravityForce.mult(mass).mult(1000); // set gravity to Kg*mm/s² 
+      
+      normalForce = gravityForce.y;
+      float mag = normalForce * mu;
+      friction = velocity.copy();
+      friction.mult(-1);
+      friction.normalize();
+      friction.mult(mag);
+    }
+    
+     private void computeVelocity() {
+      computeForces();
+      acceleration = new PVector(gravityForce.x, 0, gravityForce.z);
+      acceleration.add(friction).div(mass);
+      acceleration.mult(deltaT*deltaT);
+      velocity.add(acceleration); 
+    }
+ 
+  
+  
   
   private void checkEdges() { //Checks the edges of the ball and changes the position and the velocity accordingly
     if(location.x + radius > PLATE_DIM/2) {

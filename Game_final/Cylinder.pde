@@ -1,5 +1,5 @@
 
-float cylinderBaseSize = 15;
+float cylinderBaseSize = 30;
 float cylinderHeight = 30;
 int cylinderResolution = 40;
 color couleur = #1932FC;

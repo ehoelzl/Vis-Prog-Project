@@ -1,24 +1,22 @@
-float radius = 17;
-float ballMass = 25;
-
+float radius = 20;
+float ballMass = 1000;
 boolean shiftMode = false;
-
-
-float PLATE_DIM = 500;
-float MAX_SPEED = 300;
-float speedFactor = 64;
+final float PLATE_DIM = 500;
+final float MAX_SPEED = 300;
 final float GRAVITY = 9.81;
-
+final float deltaT = 1/60f;
 Ball ball;
 Plate plate;
 
+
+float speedFactor = 64;
 
 void settings() {
   size(1000, 1000, P3D);
 }
 
 void setup() {
-  ball = new Ball(radius, ballMass);
+  ball = new Ball(radius,ballMass);
   plate = new Plate(PLATE_DIM);
 }
 
