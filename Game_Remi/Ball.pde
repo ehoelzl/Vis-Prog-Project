@@ -59,11 +59,6 @@ class Ball {
         location = potentialLocation.copy();
       }
     }
-        
-    //location.x = Math.min(location.x, plateWidth / 2f);
-    //location.x = Math.max(location.x, - plateWidth / 2f);
-    //location.z = Math.min(location.z, plateWidth / 2f);
-    //location.z = Math.max(location.z, - plateWidth / 2f);
     
     potentialLocation = location.copy();
     
