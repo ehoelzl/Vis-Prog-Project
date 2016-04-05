@@ -14,7 +14,7 @@ class Cylinder {
   private float[] y = new float[cylinderResolution + 1];
   private PShape openCylinder, bottomSurface, topSurface;
     
-  Cylinder(){
+  public Cylinder(){
     openCylinder = new PShape();
     bottomSurface = new PShape();
     topSurface = new PShape();
