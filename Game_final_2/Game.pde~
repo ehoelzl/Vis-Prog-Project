@@ -1,0 +1,49 @@
+float rotateX = .0;
+float rotateZ = .0;
+float PLATE_WIDTH = 10;
+float speedFactor = 64;
+float MAX_SPEED = 300;
+
+void settings() {
+  size(1000, 1000, P3D);
+}
+
+void setup() {
+}
+
+
+void draw() {
+  translate(width / 2, height / 2, 0);
+  background(#403535);
+  rotateX(rotateX);
+  rotateZ(rotateZ);
+  scale(1, .04, 1);
+  fill(#2CDE1D);
+  box(width / 2);
+}
+
+void mouseDragged() {
+  if(pmouseY > mouseY) { //rotateX
+    rotateX = min(rotateX + PI / speedFactor, PI / 6);
+  } else {
+    if(pmouseY < mouseY) {
+      rotateX = max(rotateX - PI / speedFactor, -PI / 6);
+    }
+  }
+  
+  if(pmouseX < mouseX) { //rotateZ
+    rotateZ = min(rotateZ + PI / speedFactor, PI / 6);
+  } else {
+    if(pmouseX > mouseX) {
+      rotateZ = max(rotateZ - PI / speedFactor, -PI / 6);
+    }
+  }
+}
+
+void mouseWheel(MouseEvent event) {
+  speedFactor += event.getCount();
+  speedFactor = max(50, speedFactor);
+  speedFactor = min(speedFactor, MAX_SPEED);
+  println(event.getCount());
+  println(speedFactor);
+}
