@@ -1,84 +1,113 @@
-float radius = 12;
-float ballMass = 1;
-boolean shiftMode = false;
+protected float radius = 12;
+protected float ballMass = 1;
 final float PLATE_DIM = 500;
 final float MAX_SPEED = 300;
 final float GRAVITY = 9.81;
 final float deltaT = 1/60f;
-Ball ball;
-Plate plate;
+protected Ball ball;
+protected Plate plate;
 
 
 float speedFactor = 64;
+boolean shiftMode = false;
+
 
 void settings() {
   size(1000, 1000, P3D);
 }
 
 void setup() {
-  ball = new Ball(radius,ballMass);
+  ball = new Ball(radius, ballMass);
   plate = new Plate(PLATE_DIM);
 }
 
-
-void draw() { //Draws the game according to the mode
+/**
+* Draws the game according to the mode
+*/
+void draw() {
   background(#403535);
-  translate(width / 2, height / 2, 0);
+  translate(width / 2, height / 2, 0); // Set the origin to the center 
   if (shiftMode){
-    drawShift();
+    drawShift(); 
   } else {
     pushMatrix();
     perspective();
-    camera(0,-400, 1.5*plate.dims,0,0,0, 0,1,0); //place camera to be looking at plate from a certain distance
-    ball.update();
-    plate.display();
-    ball.display();
+    
+    camera(0, -400, 1.5 * plate.dim, 0, 0, 0, 0, 1, 0); //place camera to be looking at plate from a certain distance
+    ball.update(); // updates the ball's position for this frame
+    plate.display(); // displays the plate
+    ball.display(); // displays the ball
+    
     popMatrix();
   }
 }
 
-void drawShift(){ //Draws the Shift Mode of the game
+/**
+* Draws the plate with a top down view, the game is paused and permits to add cylinders on the plate
+*/
+void drawShift() { 
   pushMatrix();
   ortho();
-  camera(0, -1.5*plate.dims,0, 0, 0, 0, 0, 0, 1 ); //Place the camera above the plate
-  plate.display();
-  ball.display();
+  
+  camera(0, -1.5 * plate.dim, 0, 0, 0, 0, 0, 0, 1); //Places the camera above the plate
+  plate.display(); // displays the plate
+  ball.display(); // displays the ball
+  
   popMatrix();
 }
 
-void keyPressed() { //Checks when to enter shiftMode
+/**
+* Checks whenever we enter the shiftMode by pressing the shift key
+*/
+void keyPressed() {   
   if (key == CODED) {
     if (keyCode == SHIFT) {
-    shiftMode = true;
+      shiftMode = true;
     }
   }
 }
 
-void keyReleased() { //Checks when to exit shiftMode
+/**
+* Checks whenever we get out of the shiftMode by releasing the shift key
+*/
+void keyReleased() { 
   if (key == CODED){
     if (keyCode == SHIFT) {
-    shiftMode = false;
+      shiftMode = false;
     }
   }  
 }
 
-void mousePressed(){ 
+/**
+* Whenever the mouse is pressed we call the mousePressed function of Plate to add cylinders
+*/
+void mousePressed() { 
   if(shiftMode){
     plate.mousePressed();
   }
 }
+
+/**
+* If we are not in shiftMode, when the mouse is dragged we call the plate function that permits to tilt the plate
+*/
 void mouseDragged() {
   if(!shiftMode){
     plate.mouseDragged();
   }
-  }
-  
+}
+
+/**
+* On a wheel event we call the plate function that permits to adjust the tilting speed
+*/
 void mouseWheel(MouseEvent event) {
   plate.mouseWheel(event);    
 }
 
- public double distance(float x1, float y1, float x2, float y2){ //Computes the distance between two points on the plane
+/**
+* Helper function to calculate the distance between two 2D points
+*/
+protected double distance(float x1, float y1, float x2, float y2) {
    float distX = Math.abs(x1 - x2);
    float distY = Math.abs(y1 - y2);
-   return Math.sqrt(distX*distX + distY*distY);
+   return Math.sqrt(distX * distX + distY * distY);
  }

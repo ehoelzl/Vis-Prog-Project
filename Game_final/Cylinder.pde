@@ -1,17 +1,21 @@
-
 float cylinderBaseSize = 30;
 float cylinderHeight = 30;
 int cylinderResolution = 40;
 color couleur = #1932FC;
 
+/**
+* The Cylinder class permits to create some cylinders and display them
+*/
 class Cylinder {
-    float angle;
-    float[] x = new float[cylinderResolution + 1];
-    float[] y = new float[cylinderResolution + 1];
+    private float angle;
+    private float[] x = new float[cylinderResolution + 1];
+    private float[] y = new float[cylinderResolution + 1];
     private PShape openCylinder, bottomSurface, topSurface;
    
-    /*Creates a cylinder shape*/
-    Cylinder(){ 
+    /**
+    * The Cylinder constructor that permits to create the shape
+    */
+    Cylinder() { 
       openCylinder = new PShape();
       bottomSurface = new PShape();
       topSurface = new PShape();
@@ -20,14 +24,16 @@ class Cylinder {
         angle = (TWO_PI / cylinderResolution) * i;
         x[i] = sin(angle) * cylinderBaseSize;
         y[i] = cos(angle) * cylinderBaseSize;
-        }
+       }
         openCylinder = createShape();
         bottomSurface = createShape();
         topSurface = createShape();
         sketchCylinder();
     }
     
-    /* Sketches the Cylinder to use */
+    /**
+    * Sketches the Cylinder to use, the open cylinder represents the cylinder body, topSurface and bottomSurface are the two bases 
+    */
     private void sketchCylinder(){ 
       openCylinder.beginShape(QUAD_STRIP);
       topSurface.beginShape(TRIANGLE_FAN);
@@ -38,8 +44,8 @@ class Cylinder {
       bottomSurface.noStroke();
       topSurface.fill(couleur);
       bottomSurface.fill(couleur);
-      topSurface.vertex(0,0,0);
-      bottomSurface.vertex(0,-cylinderHeight, 0);
+      topSurface.vertex(0, 0, 0);
+      bottomSurface.vertex(0, - cylinderHeight, 0);
   
       for(int i = 0; i < x.length; i++) {
         openCylinder.vertex(x[i], 0 , y[i]);
@@ -52,10 +58,12 @@ class Cylinder {
       bottomSurface.endShape();
     }
     
-    /* Displays the cylinder on the given position */
+    /** 
+    * Displays the cylinder on the given position 
+    */
     public void display(float x, float y ,float z){ // display the cylinder at the correct location //<>//
       pushMatrix();
-      translate(x,y,z);
+      translate(x, y, z);
       shape(topSurface);
       shape(bottomSurface);
       shape(openCylinder);
