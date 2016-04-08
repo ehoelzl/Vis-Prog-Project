@@ -1,6 +1,7 @@
   float rotateX;
   float rotateZ;
   ArrayList<PVector> cylinders;
+  color plateColor = #03FCAB;
 class Plate {
   private float dims;
   private Cylinder cylinder = new Cylinder();
@@ -23,7 +24,7 @@ class Plate {
     pushMatrix();
     stroke(3);
     lights();
-    fill(#2CDE1D);
+    fill(plateColor);
     box(dims,dims * 0.04, dims);
     if (!cylinders.isEmpty()){
       for(PVector p : cylinders){

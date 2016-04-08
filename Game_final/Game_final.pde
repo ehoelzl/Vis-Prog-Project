@@ -24,6 +24,7 @@ void setup() {
 void draw() { //Draws the game according to the mode
   background(#403535);
   translate(width / 2, height / 2, 0);
+  lights();
   if (shiftMode){
     drawShift();
   } else {
