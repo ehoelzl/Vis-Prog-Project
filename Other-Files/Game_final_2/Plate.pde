@@ -1,6 +1,7 @@
 float rotateX;
 float rotateZ;
 ArrayList<PVector> cylinders;
+color plateColor = #2CDE1D;
 
 /**
 * The class Plate, that permits to handle the plate functionnalities
@@ -32,7 +33,7 @@ class Plate {
     pushMatrix();
     stroke(3);
     lights();
-    fill(#2CDE1D);
+    fill(plateColor);
     box(dim, dim * 0.04, dim);
     if (!cylinders.isEmpty()){
       for(PVector p : cylinders){

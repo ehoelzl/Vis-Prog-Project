@@ -1,7 +1,7 @@
 float cylinderBaseSize = 30;
-float cylinderHeight = 30;
+float cylinderHeight = 50;
 int cylinderResolution = 40;
-color couleur = #1932FC;
+color cylinderColor = #1932FC;
 
 /**
 * The Cylinder class permits to create some cylinders and display them
@@ -39,11 +39,11 @@ class Cylinder {
       topSurface.beginShape(TRIANGLE_FAN);
       bottomSurface.beginShape(TRIANGLE_FAN);
       openCylinder.noStroke();
-      openCylinder.fill(couleur);
+      openCylinder.fill(cylinderColor);
       topSurface.noStroke();
       bottomSurface.noStroke();
-      topSurface.fill(couleur);
-      bottomSurface.fill(couleur);
+      topSurface.fill(cylinderColor);
+      bottomSurface.fill(cylinderColor);
       topSurface.vertex(0, 0, 0);
       bottomSurface.vertex(0, - cylinderHeight, 0);
   

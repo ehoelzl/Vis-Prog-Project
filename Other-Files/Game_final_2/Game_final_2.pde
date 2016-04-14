@@ -1,12 +1,12 @@
 protected float radius = 12;
 protected float ballMass = 1;
 final float PLATE_DIM = 500;
-final float MAX_SPEED = 300;
 final float GRAVITY = 9.81;
-final float deltaT = 1/60f;
+final float MAX_SPEED = 300;
+final float deltaT = 1/80f;
 protected Ball ball;
 protected Plate plate;
-
+protected Panel panel;
 
 float speedFactor = 64;
 boolean shiftMode = false;
@@ -16,16 +16,22 @@ void settings() {
   size(1000, 1000, P3D);
 }
 
+
 void setup() {
+  frameRate(80);
   ball = new Ball(radius, ballMass);
   plate = new Plate(PLATE_DIM);
+  panel = new Panel();
 }
+
 
 /**
 * Draws the game according to the mode
 */
 void draw() {
   background(#403535);
+  panel.drawPanel(ball);
+  pushMatrix();
   translate(width / 2, height / 2, 0); // Set the origin to the center 
   if (shiftMode){
     drawShift(); 
@@ -33,13 +39,14 @@ void draw() {
     pushMatrix();
     perspective();
     
-    camera(0, -600,  plate.dim, 0, 0, 0, 0, 1, 0); //place camera to be looking at plate from a certain distance
-    ball.update(); // updates the ball's position for this frame
+    camera(0, -600,  1.3*plate.dim, 0, 0, 0, 0, 1, 0); //place camera to be looking at plate from a certain distance
+    ball.update(panel); // updates the ball's position for this frame
     plate.display(); // displays the plate
     ball.display(); // displays the ball
     
     popMatrix();
   }
+  popMatrix();
 }
 
 /**
@@ -91,7 +98,7 @@ void mousePressed() {
 * If we are not in shiftMode, when the mouse is dragged we call the plate function that permits to tilt the plate
 */
 void mouseDragged() {
-  if(!shiftMode){
+  if(!shiftMode && mouseY < 800){
     plate.mouseDragged();
   }
 }
