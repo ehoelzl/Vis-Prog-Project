@@ -93,5 +93,6 @@ class Plate {
   public void mouseWheel(MouseEvent event) {
     speedFactor += event.getCount();
     speedFactor = max(50, speedFactor);
-    speedFactor = min(speedFactor, MAX_SPEED);  }
- }
+    speedFactor = min(speedFactor, MAX_SPEED);  
+  }
+}

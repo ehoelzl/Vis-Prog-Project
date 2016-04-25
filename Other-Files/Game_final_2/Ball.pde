@@ -10,12 +10,12 @@ class Ball {
   private PVector nextLocation;
   private PVector gravityForce;  //[Kg * mm / s² ]
   private PVector velocity; //[mm/s]
-  private PVector oldVelocity;
+  private PVector nextVelocity; //[mm/s]
   private float normalForce = 0;
-  private float mu = 0.1;
+  private float mu = 0.25;
   private PVector friction;
   private float mass;
-  private float elasticity = 0.8; // each bounce on a cylinder/boudary absorbs ((1 - 'elasticity') * 100) % of the force 
+  private float elasticity = 0.6; // each bounce on a cylinder/boudary absorbs ((1 - 'elasticity') * 100) % of the force 
   
   
   PVector potentialVelocity = new PVector();
@@ -31,7 +31,7 @@ class Ball {
     gravityForce = new PVector();
     
     velocity = new PVector();
-    oldVelocity = new PVector();
+    nextVelocity = new PVector();
     friction = new PVector();
     
   }
@@ -52,27 +52,30 @@ class Ball {
   /**
   * Updates the ball's location, and handle bounces
   */
-  final float epsilon = 0.1;
+  final float epsilon = 0.5;
   protected void update(Panel pan) {
-    computeVelocity();
-    computeLocation(nextLocation);
-    double velocityMag = (distance(nextLocation.x,nextLocation.z, location.x, location.z) < epsilon) ? 0: oldVelocity.mag()/1000;
-    pan.updateVelocity(velocityMag); //Updates the velocity value in class Panel
-    
+    computeLocation(nextLocation, velocity); //Updates nextLocation with velocity
+    nextVelocity = velocity.copy();
     if(!cylinderCollision()) {
-      if(checkEdges(nextLocation)) {
-        computeLocation(location);
-        if (distance(nextLocation.x,nextLocation.z, location.x, location.z) > epsilon){
-        pan.updateScore(false, oldVelocity.mag()); //solves the problem of losing points while not moving 
+      if(checkEdges(nextLocation, velocity)) {
+        if (distance(nextLocation.x,nextLocation.z, location.x, location.z) > epsilon){ //solves the problem of losing points while not moving 
+          pan.updateScore(false, velocity.mag()); 
         }
-      } else {
-        location = nextLocation.copy();
       }
-    } else {
-      pan.updateScore(true, oldVelocity.mag());
+    }else {
+      if (distance(nextLocation.x,nextLocation.z, location.x, location.z) > epsilon){
+        pan.updateScore(true, velocity.mag()); //the ball hit the cylinder with its velocity
+      }
     }
-    nextLocation = location.copy();
-    oldVelocity = velocity.copy();
+    
+    pan.updateVelocity(nextVelocity.mag()); //Updates the velocity value in class Panel
+    
+    addForces_to_Velocity(); //updates nextVelocity with forces
+    
+   
+    location = nextLocation.copy();
+    velocity = nextVelocity.copy();
+
   }
   
   /**
@@ -82,11 +85,8 @@ class Ball {
     loc.add(vel.x * deltaT, 0, vel.z * deltaT);
   }
   
-  private void computeLocation(PVector loc) {
-    computeLocation(loc, velocity);
-  }
-  
-  private void computeForces() {
+  /*Computes the forces acting on the ball and returns the acceleration for the frame*/
+  private PVector computeForces() {
    
     // Here we compute the gravity force
     gravityForce.x = sin(rotateZ) * cos(rotateX) * GRAVITY;
@@ -97,37 +97,38 @@ class Ball {
     // Here we compute the friction force
     normalForce = gravityForce.y;
     float mag = normalForce * mu;
-    friction = oldVelocity.copy();
+    friction = velocity.copy();
     friction.mult(-1);
     friction.normalize();
     friction.mult(mag); 
+    PVector acceleration = new PVector(gravityForce.x, 0, gravityForce.z);
+    return acceleration.add(friction).div(this.mass).mult(deltaT);
   }
     
   /**
   * Helper function the permits to compute the new velocity depending on the current forces
   */
-  private void computeVelocity() {
-    computeForces();
-    velocity = new PVector(gravityForce.x, 0, gravityForce.z);
-    velocity.add(friction).div(mass);
-    velocity.mult(deltaT);
-    velocity.add(oldVelocity); 
+  private void addForces_to_Velocity() {
+    PVector acceleration = computeForces();
+    nextVelocity = nextVelocity.add(acceleration); 
   }
  
   
   
   /**
-  * Checks if the given location fits in the boundaries
+  * Checks if the given location fits in the boundaries, given its initial velocity and changes nextVelocity accordingly
   */
-  private boolean checkEdges(PVector location) { 
+  private boolean checkEdges(PVector loc, PVector vel) { 
     boolean hit = false;
-    if(location.x + radius > PLATE_DIM / 2f || location.x - radius < - PLATE_DIM / 2f) {
-      velocity.x = (oldVelocity.x * -1) * elasticity;
+    if(loc.x + radius > PLATE_DIM / 2f || loc.x - radius < - PLATE_DIM / 2f) {
+      nextVelocity.x = (vel.x * -1) * elasticity;
+      loc.x = Math.signum(loc.x) * (PLATE_DIM/2f - radius);
       hit = true;
     } 
     
-    if(location.z + radius > PLATE_DIM / 2f || nextLocation.z - radius < - PLATE_DIM / 2f) {
-      velocity.z = (oldVelocity.z * -1) * elasticity;
+    if(loc.z + radius > PLATE_DIM / 2f || loc.z - radius < - PLATE_DIM / 2f) {
+      nextVelocity.z = (vel.z * -1) * elasticity;
+      loc.z = Math.signum(loc.z) * (PLATE_DIM/2f - radius);
       hit = true;
     } 
     
@@ -135,19 +136,20 @@ class Ball {
   }
   
   /**
-  * Handles cylinder collisions given a certain location of ball and collision
+  * Handles cylinder collisions given a certain location of ball, cylinder, and nextVelocity
   */
-  private void handleCollision(PVector ballLoc, PVector cyl) {
+  private void handleCollision(PVector ballLoc, PVector cyl, PVector nextVel) {
     
-      PVector n = ballLoc.sub(cyl).normalize(); //Normal vector from cylinder to ball center 
-      velocity = oldVelocity.copy().sub(n.copy().mult(2 * oldVelocity.copy().dot(n))).mult(elasticity); // New Velocity after collision 
+      PVector n = ballLoc.copy().sub(cyl).normalize(); //Normal vector from cylinder to ball center 
+      nextVel = nextVel.add(velocity.copy().sub(n.copy().mult(2 * velocity.copy().dot(n))).mult(elasticity)); // New Velocity after collision 
       n.setMag(cylinderBaseSize + radius); // n points from cylinder center to 
       
       //This resets the ball to the border of cylinder
+     
       ballLoc.x = cyl.x + n.x;
       ballLoc.y = cyl.y;
       ballLoc.z = cyl.z + n.z;
-
+      
     }
   
   
@@ -155,24 +157,24 @@ class Ball {
   * Iterates on each cylinder and treats each collision seperately, changing the location of the ball accordingly
   */
   private boolean cylinderCollision() {
-    PVector velocitySave = velocity.copy();
-    velocity = new PVector();
+    PVector potentialVelocity = new PVector(); //Potential velocity after collision
     boolean hit = false;
+    int num = 0; // Number of hits
     for(PVector v : cylinders){
       if (distance(nextLocation.x, nextLocation.z, v.x, v.y) <= cylinderBaseSize + radius) {
-         handleCollision(nextLocation, new PVector(v.x, sphereY, v.y));
+         handleCollision(nextLocation, new PVector(v.x, sphereY, v.y), potentialVelocity);
          hit = true;
+         num++;
       }
     }
     if(hit) {
-      computeLocation(nextLocation);
-      if(checkEdges(nextLocation)) {
-       nextLocation = location.copy();
+      nextVelocity = potentialVelocity.div(num);
+      computeLocation(nextLocation, nextVelocity);
+      if(checkEdges(nextLocation, nextVelocity)){ //Checks if ball bounces out of bounds
+         nextLocation = location.copy();
       }
-      location = nextLocation.copy();
-    } else {
-      velocity = velocitySave.copy();
     }
+  
     return hit;
   }
    

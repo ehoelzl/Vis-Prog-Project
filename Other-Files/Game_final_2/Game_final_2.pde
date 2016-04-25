@@ -3,7 +3,7 @@ protected float ballMass = 1;
 final float PLATE_DIM = 500;
 final float GRAVITY = 9.81;
 final float MAX_SPEED = 300;
-final float deltaT = 1/80f;
+final float deltaT = 1/60f;
 protected Ball ball;
 protected Plate plate;
 protected Panel panel;
@@ -18,7 +18,6 @@ void settings() {
 
 
 void setup() {
-  frameRate(80);
   ball = new Ball(radius, ballMass);
   plate = new Plate(PLATE_DIM);
   panel = new Panel();

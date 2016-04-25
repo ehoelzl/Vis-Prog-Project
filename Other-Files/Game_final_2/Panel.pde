@@ -27,10 +27,13 @@ HScrollbar bar;
     drawBackground();
     drawTopView(ball);
     drawScoreBoard();
-    chartGraph.drawChart();
     bar.updateBar();
     chartGraph.updateScale(bar.getPos());
     bar.drawScrollbar();
+    chartGraph.drawChart();
+    
+   
+   
   }
   
   private void drawBackground(){
@@ -56,30 +59,27 @@ HScrollbar bar;
   
   double epsilon = .01;
   protected void updateScore(Boolean cylinderHit, double velocityMag){
-    double lastTotalScore = totalScore;
-    if (cylinderHit){
-      totalScore += velocityMag/1000;
-      lastScore = velocityMag/1000;
-      if (Math.abs(lastTotalScore - totalScore) > epsilon) {
-        chartGraph.update(totalScore);}
-     
-      
-    } else {
-      totalScore -= velocityMag /1000;
-      lastScore = -velocityMag/1000;
-      if (Math.abs(lastTotalScore - totalScore) > epsilon) {
-        chartGraph.update(totalScore);}
-    
-    }
+    int velMag = (int)Math.floor(velocityMag/100);
+    if (velMag != 0){
+      if (cylinderHit){
+          totalScore += velMag;
+          lastScore = velMag;
+        } else {
+          totalScore -= velMag;
+          lastScore = -velMag;
+        }
+        chartGraph.update(totalScore);
+      }
   }
   
   protected void updateVelocity(double vel){
-    velocity = vel;
+    velocity = Math.round(vel/100);
   }
   
   final String totalScore_s = "Total score";
   final String vel = "Velocity";
   final String lastScore_s = "Last score";
+  
   private void drawScoreBoard(){
     scoreBoard.beginDraw();
     scoreBoard.background(bgColor);
@@ -90,11 +90,11 @@ HScrollbar bar;
     //scoreBoard.textSize(10);
     scoreBoard.textFont(font);
     scoreBoard.text(totalScore_s, 5, 30);
-    scoreBoard.text(String.format("%.2f", totalScore), 65, 60);
+    scoreBoard.text(String.format("%.0f", totalScore), 65, 60);
     scoreBoard.text(vel, 35,90); 
-    scoreBoard.text(String.format("%.2f", velocity), 65, 120);
+    scoreBoard.text(String.format("%.0f", velocity), 65, 120);
     scoreBoard.text(lastScore_s, 15, 150);
-    scoreBoard.text(String.format("%.2f", lastScore), 65, 180);
+    scoreBoard.text(String.format("%.0f", lastScore), 65, 180);
     scoreBoard.endDraw();
     image(scoreBoard, topViewDim + 30, 805);
   }
