@@ -26,12 +26,8 @@ void setup() {
 */
 void draw() {
   background(#403535);
-<<<<<<< HEAD
   translate(width / 2, height / 2, 0);
   lights();
-=======
-  translate(width / 2, height / 2, 0); // Set the origin to the center 
->>>>>>> a84cd97aa08b29d73170269f57d589ac9aff42ab
   if (shiftMode){
     drawShift(); 
   } else {
