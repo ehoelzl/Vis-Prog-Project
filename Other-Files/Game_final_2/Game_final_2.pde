@@ -1,5 +1,5 @@
 protected float radius = 12;
-protected float ballMass = 1;
+protected float ballMass = 10;
 final float PLATE_DIM = 500;
 final float GRAVITY = 9.81;
 final float MAX_SPEED = 300;
@@ -13,11 +13,16 @@ boolean shiftMode = false;
 
 
 void settings() {
-  size(1000, 1000, P3D);
+   bg = loadImage("background2.jpg");
+    size(1000, 1000, P3D);
+  
 }
 
-
+PImage bg;
 void setup() {
+  /*pushMatrix();
+   background(bg);
+   popMatrix();*/
   ball = new Ball(radius, ballMass);
   plate = new Plate(PLATE_DIM);
   panel = new Panel();
@@ -28,10 +33,12 @@ void setup() {
 * Draws the game according to the mode
 */
 void draw() {
-  background(#403535);
+  background(#7996E3);
+  directionalLight(255,255,255,0, 2,-15);
   panel.drawPanel(ball);
   pushMatrix();
   translate(width / 2, height / 2, 0); // Set the origin to the center 
+ 
   if (shiftMode){
     drawShift(); 
   } else {

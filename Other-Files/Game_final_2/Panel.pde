@@ -3,7 +3,7 @@
 class Panel {
   
 PFont font = createFont("Xenotron.ttf", 19);
-color bgColor = #E3CF1B;
+color bgColor =#6943AF;
 PGraphics background;
 PGraphics topView;
 PGraphics scoreBoard;
@@ -65,7 +65,7 @@ HScrollbar bar;
           totalScore += velMag;
           lastScore = velMag;
         } else {
-          totalScore -= velMag;
+          totalScore = Math.max(0,totalScore - velMag);
           lastScore = -velMag;
         }
         chartGraph.update(totalScore);
@@ -73,7 +73,7 @@ HScrollbar bar;
   }
   
   protected void updateVelocity(double vel){
-    velocity = Math.round(vel/100);
+    velocity =Math.round(vel/100);
   }
   
   final String totalScore_s = "Total score";
@@ -87,14 +87,15 @@ HScrollbar bar;
     scoreBoard.stroke(#FFFFFF);
     scoreBoard.strokeWeight(5);
     scoreBoard.rect(0,0,200, 190);
-    //scoreBoard.textSize(10);
-    scoreBoard.textFont(font);
+    scoreBoard.fill(#151313);
+    scoreBoard.textFont(font); //here we can change the font
+    
     scoreBoard.text(totalScore_s, 5, 30);
-    scoreBoard.text(String.format("%.0f", totalScore), 65, 60);
+    scoreBoard.text(String.format("%.0f", totalScore), 70, 60);
     scoreBoard.text(vel, 35,90); 
-    scoreBoard.text(String.format("%.0f", velocity), 65, 120);
+    scoreBoard.text(String.format("%.0f", velocity), 70, 120);
     scoreBoard.text(lastScore_s, 15, 150);
-    scoreBoard.text(String.format("%.0f", lastScore), 65, 180);
+    scoreBoard.text(String.format("%.0f", lastScore), 70, 180);
     scoreBoard.endDraw();
     image(scoreBoard, topViewDim + 30, 805);
   }

@@ -1,4 +1,4 @@
-color ballColor = #F5A800;
+color ballColor = #000EFC;
 /**
 * The class Ball permits to handle all of the ball's functionalities
 */
@@ -56,6 +56,7 @@ class Ball {
   protected void update(Panel pan) {
     computeLocation(nextLocation, velocity); //Updates nextLocation with velocity
     nextVelocity = velocity.copy();
+    
     if(!cylinderCollision()) {
       if(checkEdges(nextLocation, velocity)) {
         if (distance(nextLocation.x,nextLocation.z, location.x, location.z) > epsilon){ //solves the problem of losing points while not moving 
@@ -70,8 +71,8 @@ class Ball {
     
     pan.updateVelocity(nextVelocity.mag()); //Updates the velocity value in class Panel
     
-    addForces_to_Velocity(); //updates nextVelocity with forces
     
+    addForces_to_Velocity(); //updates nextVelocity with forces
    
     location = nextLocation.copy();
     velocity = nextVelocity.copy();
@@ -148,7 +149,7 @@ class Ball {
      
       ballLoc.x = cyl.x + n.x;
       ballLoc.y = cyl.y;
-      ballLoc.z = cyl.z + n.z;
+      ballLoc.z = cyl.z + n.z ;
       
     }
   
@@ -158,21 +159,35 @@ class Ball {
   */
   private boolean cylinderCollision() {
     PVector potentialVelocity = new PVector(); //Potential velocity after collision
+    PVector potentialPosition = nextLocation.copy();
     boolean hit = false;
     int num = 0; // Number of hits
     for(PVector v : cylinders){
-      if (distance(nextLocation.x, nextLocation.z, v.x, v.y) <= cylinderBaseSize + radius) {
-         handleCollision(nextLocation, new PVector(v.x, sphereY, v.y), potentialVelocity);
+      if (distance(potentialPosition.x, potentialPosition.z, v.x, v.y) <= cylinderBaseSize + radius) {
+         handleCollision(potentialPosition, new PVector(v.x, sphereY, v.y), potentialVelocity);
          hit = true;
          num++;
       }
     }
     if(hit) {
-      nextVelocity = potentialVelocity.div(num);
-      computeLocation(nextLocation, nextVelocity);
-      if(checkEdges(nextLocation, nextVelocity)){ //Checks if ball bounces out of bounds
-         nextLocation = location.copy();
+      
+      computeLocation(potentialPosition, potentialVelocity.div(num)); //Computes where the ball should be after collision
+      //nextVelocity = potentialVelocity.div(num);
+      /*if (num > 1) {
+        nextLocation = location.copy();
+      }*/
+     // computeLocation(, nextVelocity);
+      if (checkEdges(potentialPosition, potentialVelocity)){
+        nextLocation = location.copy();
+        nextVelocity = velocity.copy().mult(-elasticity); //if it touches both the cylinder and edge, make it bounce backwards (solves some bugs)
+      } else  {
+        nextLocation = potentialPosition.copy();
+        nextVelocity = potentialVelocity.div(num);
       }
+      
+      /*if(checkEdges(potentialPosition, potentialVelocity)){ //Checks if ball bounces out of bounds
+         potential = location.copy();
+      }*/
     }
   
     return hit;

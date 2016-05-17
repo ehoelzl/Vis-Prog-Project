@@ -1,7 +1,7 @@
 float cylinderBaseSize = 30;
 float cylinderHeight = 50;
 int cylinderResolution = 40;
-color cylinderColor = #1932FC;
+color cylinderColor = #12F207;
 
 /**
 * The Cylinder class permits to create some cylinders and display them
