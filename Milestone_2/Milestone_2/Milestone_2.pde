@@ -5,15 +5,16 @@ import java.util.Random;
 PImage sobel;
 PImage hough;
 PImage original;
-float lowerHue = 75; //96
-float upperHue = 140; //140
-float lowerBrightness = 0;  //19
-float upperBrightness = 232; // 171
-float lowerSaturation = 99; // 58
-float upperSaturation = 256; // 256
+float lowerHue = 96; //96  75 100
+float upperHue = 140; //140  
+float lowerBrightness = 20;  //19  0 20
+float upperBrightness = 171; // 171  232 150
+float lowerSaturation = 99; // 58  99 130
+float upperSaturation = 255; // 256
+float minIntensity = 35; // 35
 int nLines = 4;
-float discretizationStepsPhi = .06f;
-float discretizationStepsR = 2.5f;
+float discretizationStepsPhi = .06f; //.06
+float discretizationStepsR = 2.5f; // 2.5
 int rDim;
 int phiDim;
 
@@ -22,20 +23,26 @@ int originalHeight = 600;
 int resizedWidth = 600;
 int resizedHeight = 450;
 
+QuadGraph graph;
+
+Capture cam;
+
 void settings() {
   size(resizedWidth * 3, resizedHeight);
 }
 
 void setup() {
-  original = loadImage("board3.jpg");
+  original = loadImage("board1.jpg");
   phiDim = (int) (Math.PI / discretizationStepsPhi);
   rDim = (int) (((originalWidth + originalHeight) * 2 + 1) / discretizationStepsR);
+  graph = new QuadGraph();
   noLoop();
 }
 
 void draw() {
   original.resize(resizedWidth, resizedHeight);
-  sobel = createSobel(gaussianBlur(thresholding(original)));
+  sobel = createSobel(intensityThresholding(gaussianBlur(thresholding(original))));
+  //sobel = thresholding(original);
   int[] accumulator = houghAccumulator(sobel);
   hough = houghImage(accumulator);
   
@@ -43,7 +50,7 @@ void draw() {
   
   image(original, 0, 0);
 
-  getIntersections(lines(nLines, accumulator));
+  drawIntersectionsAndQuads(lines(nLines, accumulator));
   
   image(sobel, original.width, 0);
   image(hough, 2 * original.width, 0);
@@ -54,7 +61,7 @@ PImage thresholding(PImage img) {
   PImage res = createImage(img.width, img.height, ALPHA);
   
   img.loadPixels();
-  res.loadPixels();
+  //res.loadPixels();
   
   for(int i = 0; i < img.width * img.height; i++) {
     if(hue(img.pixels[i]) >= lowerHue && hue(img.pixels[i]) <= 
@@ -63,7 +70,7 @@ PImage thresholding(PImage img) {
       upperSaturation) {
         res.pixels[i] = img.pixels[i];
      } else {
-        res.pixels[i] = color(0, 0, 0);
+        res.pixels[i] = color(0);
      }
   }
   res.updatePixels();
@@ -73,16 +80,15 @@ PImage thresholding(PImage img) {
 PImage gaussianBlur(PImage img) {
   
   float[][] kernel = { { 9, 12, 9 },
-                      { 12, 15, 12 },
-                      { 9, 12, 9 }};
+                    { 12, 15, 12 },
+                    { 9, 12, 9 }};
                        
-  float weight = 4 * 9 + 4 * 12 + 15;
+  float weight = 99;
+  
   int sum = 0;
  
   int N = 3; 
  
-  PImage result = createImage(img.width, img.height, ALPHA);
-  result.loadPixels();
   img.loadPixels();
   
   for(int x = N / 2; x < img.width - N / 2; x++) {
@@ -94,13 +100,28 @@ PImage gaussianBlur(PImage img) {
             brightness(img.pixels[(y - N / 2 + j) * img.width + (x - N / 2 + i)]);
            }
          }
-         result.pixels[y * img.width + x] = color(sum / weight);
+         img.pixels[y * img.width + x] = color(sum / weight);
       }
    }
-   result.updatePixels();
-   return result;
+   img.updatePixels();
+   return img;
   
   }
+  
+PImage intensityThresholding(PImage img) {
+  img.loadPixels();
+  for(int i = 0; i < original.width * original.height; i++) {
+    if(brightness(img.pixels[i]) < minIntensity) {
+      img.pixels[i] = color(0, 0, 0);
+    } else {
+      img.pixels[i] = color(255, 255, 255);
+    }
+  }
+  
+  img.updatePixels();
+  
+  return img;
+}
 
 PImage createSobel(PImage img) {
   
@@ -153,7 +174,7 @@ PImage createSobel(PImage img) {
    }
   for (int y = 2; y < img.height - 2; y++) { // Skip top and bottom edges
     for (int x = 2; x < img.width - 2; x++) { // Skip left and right
-      if (buffer[y * img.width + x] > (max * 0.3f)) { // 30% of the max
+      if (buffer[y * img.width + x] > (max * 0.45f)) { // 30% of the max
         result.pixels[y * img.width + x] = color(255);
       } else {
         result.pixels[y * img.width + x] = color(0);
@@ -277,55 +298,80 @@ ArrayList<PVector> lines(int nLines, int[] accumulator) {
      // => x = 0 : y = r / sin(phi)
      // compute the intersection of this line with the 4 borders of
      // the image
-     int x0 = 0;
-     int y0 = (int) (r / sin(phi));
-     int x1 = (int) (r / cos(phi));
-     int y1 = 0;
-     int x2 = original.width;
-     int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
-     int y3 = original.width;
-     int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
-     // Finally, plot the lines
-     stroke(204,102,0);
-     if (y0 > 0) {
-       if (x1 > 0)
-         line(x0, y0, x1, y1);
-       else if (y2 > 0)
-         line(x0, y0, x2, y2);
-       else
-         line(x0, y0, x3, y3);
-     }
-     else {
-       if (x1 > 0) {
-         if (y2 > 0)
-           line(x1, y1, x2, y2);
-         else
-           line(x1, y1, x3, y3);
-       }
-       else
-         line(x2, y2, x3, y3);
-     }
+     //int x0 = 0;
+     //int y0 = (int) (r / sin(phi));
+     //int x1 = (int) (r / cos(phi));
+     //int y1 = 0;
+     //int x2 = original.width;
+     //int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
+     //int y3 = original.width;
+     //int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
+     //// Finally, plot the lines
+     //stroke(204,102,0);
+     //if (y0 > 0) {
+     //  if (x1 > 0)
+     //    line(x0, y0, x1, y1);
+     //  else if (y2 > 0)
+     //    line(x0, y0, x2, y2);
+     //  else
+     //    line(x0, y0, x3, y3);
+     //}
+     //else {
+     //  if (x1 > 0) {
+     //    if (y2 > 0)
+     //      line(x1, y1, x2, y2);
+     //    else
+     //      line(x1, y1, x3, y3);
+     //  }
+     //  else
+     //    line(x2, y2, x3, y3);
+     //}
   }
    return lines;
   
 }
 
-ArrayList<PVector> getIntersections(ArrayList<PVector> lines) {
+void drawIntersectionsAndQuads(ArrayList<PVector> lines) {
   
-  ArrayList<PVector> intersections = new ArrayList<PVector>();
-  for (int i = 0; i < lines.size() - 1; i++) {
-    PVector line1 = lines.get(i);
-      for (int j = i + 1; j < lines.size(); j++) {
-        PVector line2 = lines.get(j);
-        // compute the intersection and add it to 'intersections'
-        float d = cos(line2.y) * sin(line1.y) - cos(line1.y) * sin(line2.y);
-        int x = (int) ((line2.x * sin(line1.y) - line1.x * sin(line2.y)) / (d));
-        int y = (int) ((-line2.x * cos(line1.y) + line1.x * cos(line2.y)) / (d));
-        // draw the intersection
-        fill(255, 128, 0);
-        ellipse(x, y, 10, 10);
-        intersections.add(new PVector(x, y));
-      }
+  graph.build(lines, original.width, original.height);
+  List<int[]> quads = graph.findCycles();
+  for(int[] quad : quads) {
+    PVector l1 = lines.get(quad[0]);
+    PVector l2 = lines.get(quad[1]);
+    PVector l3 = lines.get(quad[2]);
+    PVector l4 = lines.get(quad[3]);
+    PVector c12 = graph.intersection(l1, l2, original.width, original.height);
+    PVector c23 = graph.intersection(l2, l3, original.width, original.height);
+    PVector c34 = graph.intersection(l3, l4, original.width, original.height);
+    PVector c41 = graph.intersection(l4, l1, original.width, original.height);
+    
+    if(graph.isConvex(c12, c23, c34, c41) && graph.validArea(c12, c23, c34, c41, width * height, 0)
+        && graph.nonFlatQuad(c12, c23, c34, c41)) {
+          stroke(204, 102, 0);
+          fill(color(255, 255, 255, 0));
+          quad(c12.x,c12.y,c23.x,c23.y,c34.x,c34.y,c41.x,c41.y);
+          fill(255, 128, 0);
+          ellipse(c12.x, c12.y, 10, 10);
+          ellipse(c23.x, c23.y, 10, 10);
+          ellipse(c34.x, c34.y, 10, 10);
+          ellipse(c41.x, c41.y, 10, 10);
+    }
   }
-  return intersections;
+  
+  ////ArrayList<PVector> intersections = new ArrayList<PVector>();
+  //for (int i = 0; i < lines.size() - 1; i++) {
+  //  PVector line1 = lines.get(i);
+  //    for (int j = i + 1; j < lines.size(); j++) {
+  //      PVector line2 = lines.get(j);
+  //      // compute the intersection and add it to 'intersections'
+  //      float d = cos(line2.y) * sin(line1.y) - cos(line1.y) * sin(line2.y);
+  //      int x = (int) ((line2.x * sin(line1.y) - line1.x * sin(line2.y)) / (d));
+  //      int y = (int) ((-line2.x * cos(line1.y) + line1.x * cos(line2.y)) / (d));
+  //      // draw the intersection
+  //      fill(255, 128, 0);
+  //      ellipse(x, y, 10, 10);
+  //      //intersections.add(new PVector(x, y));
+  //    }
+  //}
+  //return intersections;
 }
