@@ -25,6 +25,7 @@ class Image_Processing extends PApplet{
   cam.loop();
    
    }*/
+	cam.loop();
  }
    void draw(){
    
