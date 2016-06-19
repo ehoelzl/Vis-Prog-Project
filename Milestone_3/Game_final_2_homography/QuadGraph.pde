@@ -332,27 +332,7 @@ class QuadGraph {
 
     return quad;
   }
-  
-  //public static List<PVector> sortCorners(List<PVector> quad) {
-
-  //// Sort corners so that they are ordered clockwise
-  //PVector a = quad.get(0);
-  //PVector b = quad.get(2);
-  //PVector center = new PVector((a.x+b.x)/2,(a.y+b.y)/2);
-  
-  //Collections.sort(quad, new CWComparator(center));
-  //int min = Integer.MIN_VALUE;
-  //int index = 0;
-  //for(int i = 0; i< 4 ; i++){
-  //  PVector tem = quad.get(i);
-  //  if(Math.sqrt(tem.x*tem.x + tem.y*tem.y)< min){
-  //    index = i;
-  //  }
-  //}
-  //Collections.rotate(quad, index );
-  //return quad;
 }
-//}
 
 class CWComparator implements Comparator<PVector> {
 

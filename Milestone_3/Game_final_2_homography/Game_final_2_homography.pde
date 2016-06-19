@@ -12,26 +12,23 @@ PVector angles;
 float speedFactor = 64;
 boolean shiftMode = false;
 
-
+boolean vrMode = true;
 
 
 
 void settings() {
-   //original = loadImage("board4.jpg");
-   bg = loadImage("background2.jpg");
     size(1000, 1000, P3D);
   
 }
 
 PImage bg;
 void setup() {
-  /*pushMatrix();
-   background(bg);
-   popMatrix();*/
-   imgproc = new Image_Processing();
-   String[] args ={"Image processing window"};
-   PApplet.runSketch(args, imgproc);
-   
+
+   if (vrMode){
+     imgproc = new Image_Processing();
+     String[] args ={"Image processing window"};
+     PApplet.runSketch(args, imgproc);
+  }
   
   
   
@@ -45,13 +42,11 @@ void setup() {
 * Draws the game according to the mode
 */
 void draw() {
+  if (vrMode){
+    angles = imgproc.getAngles();
+    plate.changeAngles(angles.x, angles.y);
+  }
   
-  
-  //original = imgproc.getImage();
-  
-  angles = imgproc.getAngles();
-  plate.changeAngles(angles.x, angles.y);
-  //print(angles.toString());
   background(#7996E3);
   directionalLight(255,255,255,0, 2,-15);
   panel.drawPanel(ball);
@@ -145,6 +140,14 @@ void mouseWheel(MouseEvent event) {
   plate.mouseWheel(event);    
 }
 
+/**
+* If we are not in shiftMode, when the mouse is dragged we call the plate function that permits to tilt the plate
+*/
+void mouseDragged() {
+  if(!shiftMode && !vrMode){
+    plate.mouseDragged();
+  }
+}
 /**
 * Helper function to calculate the distance between two 2D points
 */

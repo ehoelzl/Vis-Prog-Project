@@ -56,7 +56,26 @@ class Plate {
    
    
  }
-  
+  /**
+  * Handles the mouse dragged event 
+  */
+  public void mouseDragged() {
+    if(pmouseY > mouseY) { //rotateX
+      rotateX = min(rotateX + PI / speedFactor, PI / 6);
+    } else {
+      if(pmouseY < mouseY) {
+        rotateX = max(rotateX - PI / speedFactor, -PI / 6);
+      }
+    }
+    
+    if(pmouseX < mouseX) { //rotateZ
+      rotateZ = min(rotateZ + PI / speedFactor, PI / 6);
+    } else {
+      if(pmouseX > mouseX) {
+        rotateZ = max(rotateZ - PI / speedFactor, -PI / 6);
+      }
+    }
+  }
   /** 
   * handles the mouse Pressed event (adds a cylinder)
   */
